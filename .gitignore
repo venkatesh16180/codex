@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+data/
+dev_checks/
+BUILD-JOURNAL.md
+*.pyc
+*.db
