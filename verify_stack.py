@@ -1,3 +1,6 @@
+# verify_stack.py
+import os
+os.environ['HF_HUB_OFFLINE'] = '1'
 import ollama, sqlite3
 from sentence_transformers import SentenceTransformer
 

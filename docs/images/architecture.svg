@@ -1,0 +1,38 @@
+<svg width="680" height="610" viewBox="0 0 680 610" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Codex architecture</title>
+<desc>A new document flows through the Librarian agent, is staged in pending_actions, passes a human review gate, is committed to a specialist knowledge base, and becomes retrievable by that specialist's grounded chat.</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<rect width="680" height="610" fill="#FFFFFF"/>
+
+<rect x="180" y="40" width="320" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="62" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">New document</text>
+<line x1="340" y1="84" x2="340" y2="124" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="180" y="124" width="320" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="340" y="146" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">Librarian (agent)</text>
+<text x="340" y="164" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">Reasons, calls tools, proposes</text>
+<line x1="340" y1="180" x2="340" y2="220" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="180" y="220" width="320" height="56" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="340" y="242" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#412402">pending_actions</text>
+<text x="340" y="260" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#633806">Staged, nothing live yet</text>
+<line x1="340" y1="276" x2="340" y2="316" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="180" y="316" width="320" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="340" y="338" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">Human review gate</text>
+<text x="340" y="356" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#712B13">review_pending.py: approve or reject</text>
+<line x1="340" y1="372" x2="340" y2="412" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="180" y="412" width="320" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="340" y="434" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">Specialist knowledge base</text>
+<text x="340" y="452" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">Committed, scoped by specialist_id</text>
+<line x1="340" y1="468" x2="340" y2="508" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="180" y="508" width="320" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="340" y="530" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#042C53">9 specialist chatbots</text>
+<text x="340" y="548" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#0C447C">Retrieves only from its own material</text>
+</svg>

@@ -45,9 +45,27 @@ CREATE TABLE pending_actions (
     target_specialist_id         INTEGER REFERENCES specialists(specialist_id),
     proposed_specialist_slug      TEXT,
     proposed_specialist_description TEXT,
+    proposed_persona_style          TEXT,
     agent_rationale                TEXT NOT NULL,
     status                          TEXT NOT NULL DEFAULT 'pending',
     created_at                      TEXT NOT NULL DEFAULT (datetime('now')),
     resolved_at                     TEXT,
     resolver_note                   TEXT
+);
+
+CREATE TABLE chat_sessions (
+    session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    specialist_id INTEGER NOT NULL REFERENCES specialists(specialist_id),
+    title TEXT,                    -- first ~50 chars of the first question; can rename later
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE chat_messages (
+    message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL REFERENCES chat_sessions(session_id),
+    role TEXT NOT NULL,            -- user | assistant
+    content TEXT NOT NULL,
+    used_web BOOLEAN NOT NULL DEFAULT 0,   -- was the web toggle on for this specific turn
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

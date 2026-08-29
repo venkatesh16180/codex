@@ -4,9 +4,10 @@ import numpy as np
 
 def search_specialist(conn, embed_model, specialist_id: int, query: str, top_k: int = 5):
     rows = conn.execute(
-        '''SELECT dc.chunk_text, dc.embedding
+        '''SELECT dc.chunk_text, dc.embedding, sd.title AS source_title
            FROM specialist_chunks sc
            JOIN document_chunks dc ON dc.chunk_id = sc.chunk_id
+           JOIN source_documents sd ON sd.document_id = dc.document_id
            WHERE sc.specialist_id = ?''',
         (specialist_id,)
     ).fetchall()
@@ -16,4 +17,5 @@ def search_specialist(conn, embed_model, specialist_id: int, query: str, top_k: 
     query_vec = embed_model.encode(query)
     scores = cosine_similarity(query_vec, vectors)
     top = np.argsort(scores)[::-1][:top_k]
-    return [{'text': rows[i]['chunk_text'], 'score': float(scores[i])} for i in top]
+    return [{'text': rows[i]['chunk_text'], 'score': float(scores[i]),
+              'source_title': rows[i]['source_title']} for i in top]

@@ -11,18 +11,32 @@ document, decide which specialist knowledge base it belongs in, or propose a new
 specialist if nothing fits, or flag it for manual review if you're not confident.
 Always check list_specialists() before deciding. Use search_similar_chunks to check
 for precedent when a document's fit is ambiguous. Conclude with exactly one of:
-propose_categorization, propose_new_specialist, or flag_for_manual_review.'''
+propose_categorization, propose_new_specialist, or flag_for_manual_review.
+
+When you call propose_new_specialist, also draft a short persona_style: 2-3
+comma-separated traits describing how this specialist should sound when answering
+chat questions later. This is a first draft a human reviewer will read, edit, or
+discard -- a reasonable attempt is enough, it does not need to be perfect. Match the
+house style of existing specialists' persona_style values, shown to you by
+list_specialists() when they're set.'''
 
 def make_tools(conn, document_id, embed_model):
     # document_id is a closure variable here, NOT a parameter of any function below --
     # the model can never see or set it, only the specialist_slug/rationale it's actually deciding.
 
     def list_specialists() -> list[dict]:
-        """List all active specialists and what each one's knowledge base covers."""
+        """List all active specialists, what each one's knowledge base covers, and
+        (when set) its persona_style, so a new proposal's persona can match house style."""
         rows = conn.execute(
-            "SELECT slug, display_name, scope_description FROM specialists WHERE status='active'"
+            "SELECT slug, display_name, scope_description, persona_style FROM specialists WHERE status='active'"
         ).fetchall()
-        return [dict(r) for r in rows]
+        out = []
+        for r in rows:
+            d = {'slug': r['slug'], 'display_name': r['display_name'], 'scope_description': r['scope_description']}
+            if r['persona_style']:
+                d['persona_style'] = r['persona_style']
+            out.append(d)
+        return out
 
     def search_similar_chunks(query: str, top_k: int = 5) -> list[dict]:
         """Search already-committed material for passages similar to a query, to check
@@ -49,7 +63,7 @@ def make_tools(conn, document_id, embed_model):
             (specialist_slug,)
         ).fetchone()
         if row is None:
-            return f"No active specialist '{specialist_slug}'. Call list_specialists() first."
+            return f"ERROR: No active specialist '{specialist_slug}'. Call list_specialists() first."
         conn.execute(
             '''INSERT INTO pending_actions
                (action_type, document_id, target_specialist_id, agent_rationale)
@@ -59,14 +73,17 @@ def make_tools(conn, document_id, embed_model):
         conn.commit()
         return 'Staged for human review. Nothing has been committed yet.'
 
-    def propose_new_specialist(slug: str, display_name: str, scope_description: str, rationale: str) -> str:
-        """Propose a new specialist when this document fits nothing on the current roster."""
+    def propose_new_specialist(slug: str, display_name: str, scope_description: str,
+                                persona_style: str, rationale: str) -> str:
+        """Propose a new specialist when this document fits nothing on the current roster.
+        Args: persona_style: a draft, 2-3 comma-separated traits for how this specialist
+              should sound in chat -- a human will review and may edit or discard it."""
         conn.execute(
             '''INSERT INTO pending_actions
                (action_type, document_id, proposed_specialist_slug,
-                proposed_specialist_description, agent_rationale)
-               VALUES ('propose_specialist', ?, ?, ?, ?)''',
-            (document_id, slug, scope_description, rationale)
+                proposed_specialist_description, proposed_persona_style, agent_rationale)
+               VALUES ('propose_specialist', ?, ?, ?, ?, ?)''',
+            (document_id, slug, scope_description, persona_style, rationale)
         )
         conn.commit()
         return 'New specialist proposal staged for human review.'
@@ -115,7 +132,11 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
             fn = tools_by_name.get(call.function.name)
             result = fn(**call.function.arguments) if fn else f'Unknown tool: {call.function.name}'
             messages.append({'role': 'tool', 'tool_name': call.function.name, 'content': str(result)})
-            if call.function.name in TERMINAL_TOOLS:
+            # Only treat a terminal-tool call as actually terminal if it succeeded --
+            # propose_categorization can fail validation (bad slug) and return an
+            # ERROR: string instead of staging anything; that must fall through to
+            # the next loop iteration, not end triage with nothing staged.
+            if call.function.name in TERMINAL_TOOLS and not str(result).startswith('ERROR:'):
                 return
 
     tools_by_name['flag_for_manual_review'](

@@ -1,5 +1,6 @@
 # ingest.py
 import hashlib, os
+os.environ['HF_HUB_OFFLINE'] = '1'
 from sentence_transformers import SentenceTransformer
 from extract import EXTRACTORS
 from chunk import chunk_text
