@@ -145,10 +145,6 @@ codex/
 └── data/                        # gitignored — your library, embeddings, and librarian.db
 ```
 
-`dev_checks/` (gitignored, not shown above) holds one-off diagnostic and
-recovery scripts written during the build — real, reusable patterns kept on
-hand, not part of the tracked deliverable.
-
 ## Known limitations
 
 - **Conversation memory only covers the last `HISTORY_TURNS` (3) exchanges.**
