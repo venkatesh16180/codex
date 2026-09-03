@@ -2,8 +2,12 @@
 import ollama
 import numpy as np
 from embeddings import deserialize_embedding, cosine_similarity
+# agent.py -- was: LIBRARIAN_MODEL = 'qwen3:4b'
+from config import LIBRARIAN_MODEL
+# agent.py -- was: print(f'  -> called {call.function.name}({call.function.arguments})')
+from logging_setup import get_logger
+logger = get_logger(__name__)
 
-LIBRARIAN_MODEL = 'qwen3:4b'
 TERMINAL_TOOLS = {'propose_categorization', 'propose_new_specialist', 'flag_for_manual_review'}
 
 SYSTEM_PROMPT = '''You are the Librarian for a personal document collection. Given one
@@ -128,7 +132,7 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
             continue
 
         for call in response.message.tool_calls:
-            print(f'  -> called {call.function.name}({call.function.arguments})')
+            logger.info('tool_call name=%s args=%s', call.function.name, call.function.arguments)
             fn = tools_by_name.get(call.function.name)
             result = fn(**call.function.arguments) if fn else f'Unknown tool: {call.function.name}'
             messages.append({'role': 'tool', 'tool_name': call.function.name, 'content': str(result)})

@@ -1,4 +1,5 @@
 # review_pending.py
+from logging_setup import get_logger
 
 def review_pending(conn):
     pending = conn.execute(
@@ -9,8 +10,10 @@ def review_pending(conn):
            WHERE pa.status='pending' ORDER BY pa.created_at"""
     ).fetchall()
 
+    logger = get_logger(__name__)
+    logger.info('pending_actions_reviewed count=%d', len(pending))
+
     if not pending:
-        print('Nothing to review.')
         return
 
     for action in pending:
