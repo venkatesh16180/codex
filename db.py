@@ -1,6 +1,6 @@
 import sqlite3
-
-DB_PATH = "data/librarian.db"
+# db.py -- was: DB_PATH = "data/librarian.db"
+from config import DB_PATH
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)

@@ -5,3 +5,4 @@ dev_checks/
 BUILD-JOURNAL.md
 *.pyc
 *.db
+.env

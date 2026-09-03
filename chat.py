@@ -2,11 +2,15 @@
 import ollama
 from search import search_specialist  # reuses Phase 3's function as-is
 from web_search import fetch_web_context
+# chat.py -- was: CHAT_MODEL / HISTORY_TURNS / RELEVANCE_THRESHOLD as module constants
+from config import CHAT_MODEL, HISTORY_TURNS, RELEVANCE_THRESHOLD, NUM_CTX
 
-CHAT_MODEL = 'llama3.2'  # deliberately NOT the tool-calling model -- see note below
-HISTORY_TURNS = 3  # how many prior question/answer pairs to feed back in -- tune here
-RELEVANCE_THRESHOLD = 0.3  # same noise floor Phase 3's isolation test used to
+
+# CHAT_MODEL = 'llama3.2'  # deliberately NOT the tool-calling model -- see note below
+# HISTORY_TURNS = 3  # how many prior question/answer pairs to feed back in -- tune here
+# RELEVANCE_THRESHOLD = 0.3  # same noise floor Phase 3's isolation test used to
                             # distinguish real matches from cross-topic scores
+# was silently defaulting to 2048 -- see BUILD-JOURNAL.md
 
 def build_persona_prompt(specialist: dict, web_enabled: bool = False) -> str:
     base = f"You are {specialist['display_name']}. {specialist['persona_style'] or ''}\n\n"
@@ -78,6 +82,6 @@ def chat_with_specialist(conn, embed_model, specialist_slug: str, user_query: st
     response = ollama.chat(
         model=CHAT_MODEL,
         messages=messages,
-        options={'num_ctx': 8192}  # was silently defaulting to 2048 -- see BUILD-JOURNAL.md
+        options={'num_ctx': NUM_CTX}  
     )
     return response.message.content
