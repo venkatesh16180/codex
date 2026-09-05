@@ -5,7 +5,7 @@ from logging_setup import get_logger
  
 logger = get_logger(__name__)
 
-MAX_CHARS = 8000  # enough for topic signal without dumping full-book text;
+MAX_CHARS = 16000  # enough for topic signal without dumping full-book text;
                    # keeps forward-compat with a token-limited classifier later
  
 def export_labels(conn, out_path='data/triage_labels.jsonl', max_chars=MAX_CHARS):

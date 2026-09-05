@@ -187,7 +187,9 @@ rpds-py==2026.6.3
 safetensors==0.8.0
     # via transformers
 scikit-learn==1.9.0
-    # via sentence-transformers
+    # via
+    #   -r requirements.in
+    #   sentence-transformers
 scipy==1.18.0
     # via
     #   scikit-learn
