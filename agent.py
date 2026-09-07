@@ -24,9 +24,15 @@ discard -- a reasonable attempt is enough, it does not need to be perfect. Match
 house style of existing specialists' persona_style values, shown to you by
 list_specialists() when they're set.'''
 
-def make_tools(conn, document_id, embed_model):
+def make_tools(conn, document_id, embed_model, dry_run: bool = False, result_sink: dict = None):
     # document_id is a closure variable here, NOT a parameter of any function below --
     # the model can never see or set it, only the specialist_slug/rationale it's actually deciding.
+    #
+    # dry_run / result_sink (Phase 12): when dry_run=True, the terminal tools below record
+    # their decision into result_sink instead of writing to pending_actions. Default is
+    # dry_run=False, which runs the exact original code path -- every existing caller that
+    # doesn't pass dry_run (add_source.py, retriage_orphaned.py, test_isolation.py, etc.)
+    # is unaffected.
 
     def list_specialists() -> list[dict]:
         """List all active specialists, what each one's knowledge base covers, and
@@ -68,6 +74,11 @@ def make_tools(conn, document_id, embed_model):
         ).fetchone()
         if row is None:
             return f"ERROR: No active specialist '{specialist_slug}'. Call list_specialists() first."
+        # dry_run (Phase 12): record the decision, skip the write -- benchmarking against
+        # already-committed documents must not stage duplicate pending_actions rows.
+        if dry_run:
+            result_sink.update(action_type='categorize_document', specialist_slug=specialist_slug, rationale=rationale)
+            return 'Staged for human review. Nothing has been committed yet.'
         conn.execute(
             '''INSERT INTO pending_actions
                (action_type, document_id, target_specialist_id, agent_rationale)
@@ -82,6 +93,10 @@ def make_tools(conn, document_id, embed_model):
         """Propose a new specialist when this document fits nothing on the current roster.
         Args: persona_style: a draft, 2-3 comma-separated traits for how this specialist
               should sound in chat -- a human will review and may edit or discard it."""
+        # dry_run (Phase 12): same as above -- record, don't write.
+        if dry_run:
+            result_sink.update(action_type='propose_specialist', specialist_slug=slug, rationale=rationale)
+            return 'New specialist proposal staged for human review.'
         conn.execute(
             '''INSERT INTO pending_actions
                (action_type, document_id, proposed_specialist_slug,
@@ -94,6 +109,10 @@ def make_tools(conn, document_id, embed_model):
 
     def flag_for_manual_review(rationale: str) -> str:
         """Abstain: stage this document for a human to decide by hand."""
+        # dry_run (Phase 12): same as above -- record, don't write.
+        if dry_run:
+            result_sink.update(action_type='manual_review', specialist_slug=None, rationale=rationale)
+            return 'Flagged for manual review.'
         conn.execute(
             "INSERT INTO pending_actions (action_type, document_id, agent_rationale) VALUES ('manual_review', ?, ?)",
             (document_id, rationale)
@@ -105,7 +124,7 @@ def make_tools(conn, document_id, embed_model):
             propose_new_specialist, flag_for_manual_review]
 
 
-def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6):
+def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6, dry_run: bool = False):
     doc = conn.execute(
         'SELECT title, file_type FROM source_documents WHERE document_id=?', (document_id,)
     ).fetchone()
@@ -114,7 +133,11 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
         (document_id,)
     ).fetchall())
 
-    tools = make_tools(conn, document_id, embed_model)
+    # dry_run (Phase 12): result_sink is the mutable dict the terminal tools above write
+    # their decision into when dry_run=True. Stays None in normal (live) use, exactly as
+    # before -- only triage_document's own dry_run branch ever reads it.
+    result_sink = {} if dry_run else None
+    tools = make_tools(conn, document_id, embed_model, dry_run=dry_run, result_sink=result_sink)
     tools_by_name = {t.__name__: t for t in tools}
     messages = [
         {'role': 'system', 'content': SYSTEM_PROMPT},
@@ -141,8 +164,9 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
             # ERROR: string instead of staging anything; that must fall through to
             # the next loop iteration, not end triage with nothing staged.
             if call.function.name in TERMINAL_TOOLS and not str(result).startswith('ERROR:'):
-                return
+                return result_sink  # None in live mode (unchanged); populated dict in dry-run mode
 
     tools_by_name['flag_for_manual_review'](
         rationale='Agent did not reach a decision within the iteration limit.'
     )
+    return result_sink
