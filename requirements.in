@@ -9,3 +9,6 @@ python-docx
 ddgs
 python-dotenv
 scikit-learn
+joblib
+fastapi
+uvicorn
