@@ -6,6 +6,27 @@ from embeddings import deserialize_embedding, cosine_similarity
 from config import LIBRARIAN_MODEL
 # agent.py -- was: print(f'  -> called {call.function.name}({call.function.arguments})')
 from logging_setup import get_logger
+from content_preview import find_real_content_start
+
+FRONT_MATTER_SCAN_LIMIT = 30  # generous headroom past Rich Dad Poor Dad's real
+                              # example (front matter ended at chunk 7)
+
+PREVIEW_CHUNK_COUNT = 8  # widened from 3 -- a heuristic can find where front matter
+                         # *starts* ending reasonably well (keyword/numeric-ratio
+                         # checks), but can't reliably tell editorial commentary
+                         # about a book from the author's own writing (see How to
+                         # Win Friends and Influence People, doc 30 -- chunks 2-5
+                         # are a legitimate, alpha-heavy revision-editor's foreword
+                         # that passes every structural check but isn't the
+                         # author's own content). More chunks gives the LLM's own
+                         # judgment more material to reason over instead of trusting
+                         # a heuristic to have found one precise cutoff.
+
+PREVIEW_CHAR_CAP = 6000  # was a flat 1500 sized for the old 3-chunk preview --
+                         # left unchanged, it would have silently undone most of
+                         # PREVIEW_CHUNK_COUNT's widening by slicing the extra
+                         # chunks right back off before the model ever saw them.
+
 logger = get_logger(__name__)
 
 TERMINAL_TOOLS = {'propose_categorization', 'propose_new_specialist', 'flag_for_manual_review'}
@@ -128,10 +149,12 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
     doc = conn.execute(
         'SELECT title, file_type FROM source_documents WHERE document_id=?', (document_id,)
     ).fetchone()
-    preview = ' '.join(r['chunk_text'] for r in conn.execute(
-        'SELECT chunk_text FROM document_chunks WHERE document_id=? ORDER BY chunk_index LIMIT 3',
-        (document_id,)
-    ).fetchall())
+    candidate_chunks = conn.execute(
+        'SELECT chunk_text FROM document_chunks WHERE document_id=? ORDER BY chunk_index LIMIT ?',
+        (document_id, FRONT_MATTER_SCAN_LIMIT)
+    ).fetchall()
+    start_idx = find_real_content_start(candidate_chunks)
+    preview = ' '.join(c['chunk_text'] for c in candidate_chunks[start_idx:start_idx + PREVIEW_CHUNK_COUNT])
 
     # dry_run (Phase 12): result_sink is the mutable dict the terminal tools above write
     # their decision into when dry_run=True. Stays None in normal (live) use, exactly as
@@ -142,7 +165,7 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
     messages = [
         {'role': 'system', 'content': SYSTEM_PROMPT},
         {'role': 'user', 'content':
-            f"Title: {doc['title']}\nType: {doc['file_type']}\nPreview:\n{preview[:1500]}"}
+            f"Title: {doc['title']}\nType: {doc['file_type']}\nPreview:\n{preview[:PREVIEW_CHAR_CAP]}"}
     ]
 
     for _ in range(max_iterations):
