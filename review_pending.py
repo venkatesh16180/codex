@@ -1,5 +1,6 @@
 # review_pending.py
 from logging_setup import get_logger
+from classifier_triage import classifier_triage
 
 def review_pending(conn):
     pending = conn.execute(
@@ -17,7 +18,7 @@ def review_pending(conn):
         return
 
     for action in pending:
-        print_summary(action)  # title, target specialist or proposed new one, agent_rationale
+        print_summary(action, conn)  # title, target specialist or proposed new one, agent_rationale
         choice = input('[a]pprove / [r]eject / [s]kip: ').strip().lower()
 
         if choice == 'a':
@@ -123,7 +124,7 @@ def commit_action(conn, action, persona_style=None):
     conn.commit()
     return True
 
-def print_summary(action):
+def print_summary(action, conn):
     print(f"\n--- pending_action #{action['action_id']} ---")
     print(f"Document: {action['document_title']}")
     print(f"Type: {action['action_type']}")
@@ -139,6 +140,17 @@ def print_summary(action):
         print("No target specialist -- flagged for manual review")
 
     print(f"Agent rationale: {action['agent_rationale']}")
+
+    # Cross-check (Phase 13.5): skip if this proposal already came from the
+    # classifier itself -- would just echo the same prediction back.
+    already_classifier_sourced = (action['agent_rationale'] or '').startswith('Classifier')
+    if not already_classifier_sourced:
+        try:
+            opinion = classifier_triage(conn, action['document_id'])
+            slug = opinion.get('specialist_slug', 'below confidence threshold')
+            print(f"[classifier cross-check: {slug} -- informational only, not authoritative]")
+        except FileNotFoundError:
+            pass  # no persisted classifier yet (Phase 13.1 not run) -- skip silently
 
 if __name__ == '__main__':
     from db import get_connection
