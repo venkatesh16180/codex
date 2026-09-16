@@ -5,8 +5,11 @@ from sentence_transformers import SentenceTransformer
 from extract import EXTRACTORS
 from chunk import chunk_text
 from embeddings import serialize_embedding
+from config import MAX_CHARS_WARNING
+from logging_setup import get_logger
 
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+logger = get_logger(__name__)
 
 def file_hash(path: str) -> str:
     return hashlib.sha256(open(path, 'rb').read()).hexdigest()
@@ -29,6 +32,13 @@ def ingest_file(path: str, conn) -> int | None:
     except Exception as e:
         print(f'Extraction failed for {path}: {e}')
         return None
+
+    if len(text) > MAX_CHARS_WARNING:
+        logger.warning(
+            'large document: %s is %d chars (warning threshold %d) -- '
+            'not rejected, just flagged for visibility',
+            path, len(text), MAX_CHARS_WARNING
+        )
 
     cur = conn.execute(
         'INSERT INTO source_documents (file_path, file_hash, title, file_type) VALUES (?, ?, ?, ?)',
