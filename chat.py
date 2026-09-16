@@ -1,9 +1,11 @@
 # chat.py
+import httpx
 import ollama
 from search import search_specialist  # reuses Phase 3's function as-is
 from web_search import fetch_web_context
 # chat.py -- was: CHAT_MODEL / HISTORY_TURNS / RELEVANCE_THRESHOLD as module constants
-from config import CHAT_MODEL, HISTORY_TURNS, RELEVANCE_THRESHOLD, NUM_CTX
+from config import CHAT_MODEL, HISTORY_TURNS, RELEVANCE_THRESHOLD, NUM_CTX, LLM_CHAT_TIMEOUT_SEC, LLM_CONNECT_TIMEOUT_SEC
+from ollama_retry import chat_with_retry  # Phase 14
 
 
 # CHAT_MODEL = 'llama3.2'  # deliberately NOT the tool-calling model -- see note below
@@ -11,6 +13,17 @@ from config import CHAT_MODEL, HISTORY_TURNS, RELEVANCE_THRESHOLD, NUM_CTX
 # RELEVANCE_THRESHOLD = 0.3  # same noise floor Phase 3's isolation test used to
                             # distinguish real matches from cross-topic scores
 # was silently defaulting to 2048 -- see BUILD-JOURNAL.md
+
+# Phase 14: a single client, built once at import time, used for every chat call.
+# LLM_CHAT_TIMEOUT_SEC (90s) is the READ timeout only -- this is the user-facing
+# path, so it must fail fast rather than hang a live conversation. Same
+# connect/read split rationale as agent.py's _triage_client.
+_chat_client = ollama.Client(timeout=httpx.Timeout(
+    connect=LLM_CONNECT_TIMEOUT_SEC,
+    read=LLM_CHAT_TIMEOUT_SEC,
+    write=LLM_CONNECT_TIMEOUT_SEC,
+    pool=LLM_CONNECT_TIMEOUT_SEC,
+))
 
 def build_persona_prompt(specialist: dict, web_enabled: bool = False) -> str:
     base = f"You are {specialist['display_name']}. {specialist['persona_style'] or ''}\n\n"
@@ -79,9 +92,13 @@ def chat_with_specialist(conn, embed_model, specialist_slug: str, user_query: st
     messages.extend(history or [])
     messages.append({'role': 'user', 'content': f"{chr(10).join(parts)}\n\nQuestion: {user_query}"})
 
-    response = ollama.chat(
+    # Phase 14: was ollama.chat(model=CHAT_MODEL, ...) -- routed through the
+    # module-level _chat_client (real timeouts, short since this is user-facing)
+    # and chat_with_retry (retries connection errors, never retries a real timeout).
+    response = chat_with_retry(
+        _chat_client,
         model=CHAT_MODEL,
         messages=messages,
-        options={'num_ctx': NUM_CTX}  
+        options={'num_ctx': NUM_CTX}
     )
     return response.message.content

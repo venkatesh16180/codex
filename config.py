@@ -21,3 +21,18 @@ RELEVANCE_THRESHOLD = _get_float('CODEX_RELEVANCE_THRESHOLD', 0.3)
 NUM_CTX = _get_int('CODEX_NUM_CTX', 8192)
 LOG_LEVEL = _get_str('CODEX_LOG_LEVEL', 'INFO')
 LOG_PATH = _get_str('CODEX_LOG_PATH', 'data/codex.log')
+
+# Phase 14
+LLM_TRIAGE_TIMEOUT_SEC = _get_int('CODEX_LLM_TRIAGE_TIMEOUT_SEC', 10800)
+# 3hr ceiling -- margin above the real 124.6-min max triage run (Phase 13
+# async stress test).
+LLM_CHAT_TIMEOUT_SEC = _get_int('CODEX_LLM_CHAT_TIMEOUT_SEC', 90)
+# user-facing call, must fail fast rather than hang a live conversation.
+MAX_CHARS_WARNING = _get_int('CODEX_MAX_CHARS_WARNING', 500_000)
+# logged warning only, not a hard reject -- doc 22 (2.87M chars) was a
+# real document, not a bug.
+LLM_CONNECT_TIMEOUT_SEC = _get_int('CODEX_LLM_CONNECT_TIMEOUT_SEC', 10)
+# separate from the read timeouts above -- a plain float passed to
+# ollama.Client(timeout=...) sets connect/read/write/pool timeouts ALL to
+# that value. Without this, a down Ollama server would hang for up to 3hr
+# just trying to connect, before the retry wrapper ever saw a ConnectError.

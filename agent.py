@@ -1,12 +1,14 @@
 # agent.py
+import httpx
 import ollama
 import numpy as np
 from embeddings import deserialize_embedding, cosine_similarity
 # agent.py -- was: LIBRARIAN_MODEL = 'qwen3:4b'
-from config import LIBRARIAN_MODEL
+from config import LIBRARIAN_MODEL, LLM_TRIAGE_TIMEOUT_SEC, LLM_CONNECT_TIMEOUT_SEC
 # agent.py -- was: print(f'  -> called {call.function.name}({call.function.arguments})')
 from logging_setup import get_logger
 from content_preview import find_real_content_start
+from ollama_retry import chat_with_retry  # Phase 14
 
 FRONT_MATTER_SCAN_LIMIT = 30  # generous headroom past Rich Dad Poor Dad's real
                               # example (front matter ended at chunk 7)
@@ -30,6 +32,20 @@ PREVIEW_CHAR_CAP = 6000  # was a flat 1500 sized for the old 3-chunk preview --
 logger = get_logger(__name__)
 
 TERMINAL_TOOLS = {'propose_categorization', 'propose_new_specialist', 'flag_for_manual_review'}
+
+# Phase 14: a single client, built once at import time, used for every triage call.
+# LLM_TRIAGE_TIMEOUT_SEC (3hr, margin above the real 124.6-min max observed in
+# Phase 13's async stress test) is the READ timeout only -- a plain float passed
+# to ollama.Client(timeout=...) would apply that same value to connect/write/pool
+# too, meaning a down Ollama server would hang for up to 3hr just trying to
+# connect before ollama_retry.py's retry logic ever saw a ConnectError.
+# LLM_CONNECT_TIMEOUT_SEC keeps the connect phase fast so retries actually retry.
+_triage_client = ollama.Client(timeout=httpx.Timeout(
+    connect=LLM_CONNECT_TIMEOUT_SEC,
+    read=LLM_TRIAGE_TIMEOUT_SEC,
+    write=LLM_CONNECT_TIMEOUT_SEC,
+    pool=LLM_CONNECT_TIMEOUT_SEC,
+))
 
 SYSTEM_PROMPT = '''You are the Librarian for a personal document collection. Given one
 document, decide which specialist knowledge base it belongs in, or propose a new
@@ -169,7 +185,13 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
     ]
 
     for _ in range(max_iterations):
-        response = ollama.chat(model=LIBRARIAN_MODEL, messages=messages, tools=tools, think=True)
+        # Phase 14: was ollama.chat(model=LIBRARIAN_MODEL, ...) -- the bare module
+        # function has no timeout support at all. Now routed through the module-level
+        # _triage_client (real timeouts) and chat_with_retry (retries connection
+        # errors, never retries a genuine read timeout).
+        response = chat_with_retry(
+            _triage_client, model=LIBRARIAN_MODEL, messages=messages, tools=tools, think=True
+        )
         messages.append(response.message)
 
         if not response.message.tool_calls:
