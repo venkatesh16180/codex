@@ -43,6 +43,7 @@ click==8.4.2
 colorama==0.4.6
     # via
     #   click
+    #   pytest
     #   tqdm
     #   typer
 ddgs==9.15.0
@@ -92,6 +93,8 @@ idna==3.19
     #   anyio
     #   httpx
     #   requests
+iniconfig==2.3.0
+    # via pytest
 itsdangerous==2.2.0
     # via streamlit
 jinja2==3.1.6
@@ -142,12 +145,15 @@ packaging==26.3
     # via
     #   altair
     #   huggingface-hub
+    #   pytest
     #   streamlit
     #   transformers
 pandas==3.0.5
     # via streamlit
 pillow==12.3.0
     # via streamlit
+pluggy==1.6.0
+    # via pytest
 primp==1.3.1
     # via ddgs
 protobuf==7.36.0
@@ -163,8 +169,12 @@ pydantic-core==2.46.4
 pydeck==0.9.3
     # via streamlit
 pygments==2.21.0
-    # via rich
+    # via
+    #   pytest
+    #   rich
 pymupdf==1.28.2
+    # via -r requirements.in
+pytest==9.1.1
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via pandas
