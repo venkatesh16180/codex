@@ -36,8 +36,17 @@ def build_persona_prompt(specialist: dict, web_enabled: bool = False) -> str:
         'said in this chat.\n\n'
     )
 
+    no_outside_knowledge = (
+        'Do not mention any name, fact, quote, page number, or claim that is not '
+        'explicitly present in the context provided below -- even if you believe '
+        "it to be true from your own general knowledge. If you are not sure whether "
+        'something appears in the context, treat it as absent rather than including '
+        "it. It is always better to say the context doesn't cover something than to "
+        'state a plausible-sounding detail that is not actually there.\n\n'
+    )
+
     if web_enabled:
-        return base + grounding_scope + (
+        return base + grounding_scope + no_outside_knowledge + (
             'Ground your answer in the LOCAL LIBRARY CONTEXT first. If it is thin or '
             'missing, you may also draw on the WEB CONTEXT below -- but say plainly when '
             "you're doing so, e.g. 'Your library doesn't cover this directly, but...'. "
@@ -46,7 +55,7 @@ def build_persona_prompt(specialist: dict, web_enabled: bool = False) -> str:
             'name that title rather than leaving the source unstated.'
         )
     else:
-        return base + grounding_scope + (
+        return base + grounding_scope + no_outside_knowledge + (
             'Answer ONLY using the LOCAL LIBRARY CONTEXT below. If the context does not '
             "contain enough to answer, say so plainly rather than guessing or drawing on "
             "general knowledge. Each passage is labeled with its source title -- if you "
