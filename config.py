@@ -26,8 +26,15 @@ LOG_PATH = _get_str('CODEX_LOG_PATH', 'data/codex.log')
 LLM_TRIAGE_TIMEOUT_SEC = _get_int('CODEX_LLM_TRIAGE_TIMEOUT_SEC', 10800)
 # 3hr ceiling -- margin above the real 124.6-min max triage run (Phase 13
 # async stress test).
-LLM_CHAT_TIMEOUT_SEC = _get_int('CODEX_LLM_CHAT_TIMEOUT_SEC', 90)
-# user-facing call, must fail fast rather than hang a live conversation.
+LLM_CHAT_TIMEOUT_SEC = _get_int('CODEX_LLM_CHAT_TIMEOUT_SEC', 420)
+# was 90 -- real testing (Phase 16) showed a cold model load on this
+# hardware taking over 180s for llama3.2 (ollama run's CLI doesn't print an
+# exact figure, so this is real margin above an observed lower bound, not a
+# precisely measured one). Still user-facing and still meant to fail
+# eventually, not hang forever -- OLLAMA_KEEP_ALIVE=30m (set at the OS
+# level, Phase 16) is the real fix for repeated cold starts; this timeout
+# is the safety net for the unavoidable first one after an Ollama/machine
+# restart.
 MAX_CHARS_WARNING = _get_int('CODEX_MAX_CHARS_WARNING', 500_000)
 # logged warning only, not a hard reject -- doc 22 (2.87M chars) was a
 # real document, not a bug.
