@@ -8,8 +8,23 @@ from chat import chat_with_specialist, HISTORY_TURNS
 from history import (create_session, save_message, list_sessions, load_session_messages,
                       rename_session, export_session_as_markdown, delete_session, get_recent_history)
 
-conn = get_connection()
-embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+# Phase 16 -- was: conn = get_connection() / embed_model = SentenceTransformer(...)
+# at plain module level, with no caching. Streamlit reruns this entire script
+# top to bottom on every single interaction (every chat message, every button
+# click) -- without @st.cache_resource, that meant reloading the embedding
+# model from disk and opening a brand-new SQLite connection on every message,
+# not just once at startup. This is the same caching gotcha file-finder's own
+# guide already documented (Phase 7) -- missed here, not a new kind of bug.
+@st.cache_resource
+def get_embed_model():
+    return SentenceTransformer('all-MiniLM-L6-v2')
+
+@st.cache_resource
+def get_cached_connection():
+    return get_connection(check_same_thread=False)
+
+conn = get_cached_connection()
+embed_model = get_embed_model()
 
 specialists = conn.execute("SELECT slug, display_name, specialist_id FROM specialists WHERE status='active'").fetchall()
 labels = {s['display_name']: s for s in specialists}
