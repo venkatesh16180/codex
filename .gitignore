@@ -6,3 +6,4 @@ BUILD-JOURNAL.md
 *.pyc
 *.db
 .env
+ci_sim/
