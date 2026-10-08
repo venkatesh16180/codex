@@ -116,6 +116,32 @@ A few constants in `chat.py` are meant to be adjusted, not treated as fixed:
   which is thin once retrieved chunks, source labels, and history are all
   accounted for.
 
+## Maintenance
+
+### Recalibrating the triage classifier
+
+The classifier backend (`--backend classifier`) is a static model trained on
+whatever was committed at the time it was last built. It doesn't update
+itself as the library grows, and its accuracy and confidence threshold are
+only as good as the corpus it saw last. Worth re-running this pipeline
+periodically -- after approving a batch of new documents, or if the
+classifier's cross-check predictions in `review_pending.py` start looking
+consistently off:
+
+```bash
+python export_triage_labels.py                       # refresh data/triage_labels.jsonl
+# check EXCLUDED_SLUGS in train_baseline_classifier.py matches current singletons:
+sqlite3 data/librarian.db "SELECT sp.slug, COUNT(DISTINCT dc.document_id) FROM specialist_chunks sc JOIN document_chunks dc ON dc.chunk_id=sc.chunk_id JOIN specialists sp ON sp.specialist_id=sc.specialist_id GROUP BY sp.slug HAVING COUNT(DISTINCT dc.document_id) < 2;"
+python train_baseline_classifier.py                   # fresh LOOCV accuracy number
+python dev_checks/calibrate_confidence_threshold.py    # fresh confidence threshold
+# update CONFIDENCE_THRESHOLD in classifier_triage.py with the new value
+python train_final_classifier.py                       # persist the retrained model
+```
+
+This is a manual, judgment-driven process, not something in CI -- it needs
+your real, uncommitted library content, and "accuracy regressed" isn't
+something a script should silently gate on.
+
 ## Project structure
 
 ```
