@@ -17,6 +17,6 @@ if __name__ == '__main__':
 
     joblib.dump({'vectorizer': vectorizer, 'classifier': clf}, MODEL_PATH)
     logger.info('classifier_persisted path=%s n_docs=%d n_classes=%d', MODEL_PATH, len(texts), len(set(labels)))
-    print(f"Saved to {MODEL_PATH}. Expected accuracy (Phase 11 LOOCV): 72.7% -- "
+    print(f"Saved to {MODEL_PATH}. Expected accuracy (LOOCV, 27 docs): 66.7% -- "
           f"this exact artifact isn't independently re-tested, since no held-out "
           f"data remains once trained on everything.")

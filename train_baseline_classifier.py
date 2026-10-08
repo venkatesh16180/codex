@@ -10,7 +10,7 @@ logger = get_logger(__name__)
  
 # Excluded: cannot evaluate a class with only 1 example under LOOCV.
 # See Phase 10 BUILD-JOURNAL for why these two are singletons by decision, not oversight.
-EXCLUDED_SLUGS = {'banking_ml', 'cognitivepsychology'}
+EXCLUDED_SLUGS = {'banking_ml', 'cognitivepsychology', 'game_walkthroughs', 'leadership'}
  
 def load_dataset(path='data/triage_labels.jsonl'):
     texts, labels, doc_ids = [], [], []
