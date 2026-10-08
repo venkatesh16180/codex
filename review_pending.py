@@ -143,7 +143,7 @@ def print_summary(action, conn):
 
     # Cross-check (Phase 13.5): skip if this proposal already came from the
     # classifier itself -- would just echo the same prediction back.
-    already_classifier_sourced = (action['agent_rationale'] or '').startswith('Classifier')
+    already_classifier_sourced = action['source_backend'] == 'classifier'
     if not already_classifier_sourced:
         try:
             opinion = classifier_triage(conn, action['document_id'])

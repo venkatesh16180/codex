@@ -63,15 +63,16 @@ def stage_classifier_decision(conn, document_id: int, decision: dict) -> None:
         else:
             conn.execute(
                 '''INSERT INTO pending_actions
-                   (action_type, document_id, target_specialist_id, agent_rationale)
-                   VALUES ('categorize_document', ?, ?, ?)''',
+                (action_type, document_id, target_specialist_id, agent_rationale, source_backend)
+                VALUES ('categorize_document', ?, ?, ?, 'classifier')''',
                 (document_id, row['specialist_id'], decision['rationale'])
             )
             conn.commit()
             return
     # falls through here for manual_review, whether original or the fallback above
     conn.execute(
-        "INSERT INTO pending_actions (action_type, document_id, agent_rationale) VALUES ('manual_review', ?, ?)",
+        "INSERT INTO pending_actions (action_type, document_id, agent_rationale, source_backend) "
+        "VALUES ('manual_review', ?, ?, 'classifier')",
         (document_id, decision['rationale'])
     )
     conn.commit()

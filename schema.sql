@@ -50,7 +50,9 @@ CREATE TABLE pending_actions (
     status                          TEXT NOT NULL DEFAULT 'pending',
     created_at                      TEXT NOT NULL DEFAULT (datetime('now')),
     resolved_at                     TEXT,
-    resolver_note                   TEXT
+    resolver_note                   TEXT,
+    source_backend                  TEXT,  -- 'llm' | 'classifier' | 'manual' -- replaces review_pending.py's
+                                            -- fragile agent_rationale.startswith('Classifier') prefix check
 );
 
 CREATE TABLE chat_sessions (
@@ -68,4 +70,14 @@ CREATE TABLE chat_messages (
     content TEXT NOT NULL,
     used_web BOOLEAN NOT NULL DEFAULT 0,   -- was the web toggle on for this specific turn
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE jobs (
+    job_id TEXT PRIMARY KEY,
+    document_id INTEGER REFERENCES source_documents(document_id),
+    backend TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'processing',
+    started_at REAL NOT NULL,
+    finished_at REAL,
+    error TEXT
 );

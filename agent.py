@@ -118,8 +118,8 @@ def make_tools(conn, document_id, embed_model, dry_run: bool = False, result_sin
             return 'Staged for human review. Nothing has been committed yet.'
         conn.execute(
             '''INSERT INTO pending_actions
-               (action_type, document_id, target_specialist_id, agent_rationale)
-               VALUES ('categorize_document', ?, ?, ?)''',
+            (action_type, document_id, target_specialist_id, agent_rationale, source_backend)
+            VALUES ('categorize_document', ?, ?, ?, 'llm')''',
             (document_id, row['specialist_id'], rationale)
         )
         conn.commit()
@@ -136,9 +136,9 @@ def make_tools(conn, document_id, embed_model, dry_run: bool = False, result_sin
             return 'New specialist proposal staged for human review.'
         conn.execute(
             '''INSERT INTO pending_actions
-               (action_type, document_id, proposed_specialist_slug,
-                proposed_specialist_description, proposed_persona_style, agent_rationale)
-               VALUES ('propose_specialist', ?, ?, ?, ?, ?)''',
+            (action_type, document_id, proposed_specialist_slug,
+                proposed_specialist_description, proposed_persona_style, agent_rationale, source_backend)
+            VALUES ('propose_specialist', ?, ?, ?, ?, ?, 'llm')''',
             (document_id, slug, scope_description, persona_style, rationale)
         )
         conn.commit()
@@ -151,7 +151,8 @@ def make_tools(conn, document_id, embed_model, dry_run: bool = False, result_sin
             result_sink.update(action_type='manual_review', specialist_slug=None, rationale=rationale)
             return 'Flagged for manual review.'
         conn.execute(
-            "INSERT INTO pending_actions (action_type, document_id, agent_rationale) VALUES ('manual_review', ?, ?)",
+            "INSERT INTO pending_actions (action_type, document_id, agent_rationale, source_backend) "
+            "VALUES ('manual_review', ?, ?, 'llm')",
             (document_id, rationale)
         )
         conn.commit()
