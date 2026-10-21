@@ -51,7 +51,7 @@ CREATE TABLE pending_actions (
     created_at                      TEXT NOT NULL DEFAULT (datetime('now')),
     resolved_at                     TEXT,
     resolver_note                   TEXT,
-    source_backend                  TEXT,  -- 'llm' | 'classifier' | 'manual' -- replaces review_pending.py's
+    source_backend                  TEXT  -- 'llm' | 'classifier' | 'manual' -- replaces review_pending.py's
                                             -- fragile agent_rationale.startswith('Classifier') prefix check
 );
 
