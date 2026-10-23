@@ -133,9 +133,9 @@ python export_triage_labels.py                       # refresh data/triage_label
 # check EXCLUDED_SLUGS in train_baseline_classifier.py matches current singletons:
 sqlite3 data/librarian.db "SELECT sp.slug, COUNT(DISTINCT dc.document_id) FROM specialist_chunks sc JOIN document_chunks dc ON dc.chunk_id=sc.chunk_id JOIN specialists sp ON sp.specialist_id=sc.specialist_id GROUP BY sp.slug HAVING COUNT(DISTINCT dc.document_id) < 2;"
 python train_baseline_classifier.py                   # fresh LOOCV accuracy number
-python dev_checks/calibrate_confidence_threshold.py    # fresh confidence threshold
-# update CONFIDENCE_THRESHOLD in classifier_triage.py with the new value
-python train_final_classifier.py                       # persist the retrained model
+python dev_checks/calibrate_confidence_threshold.py    # do correct/wrong confidence ranges still separate?
+# update CONFIDENCE_THRESHOLD in classifier_triage.py only if the evidence supports it; a documented non-change is valid
+python train_final_classifier.py                       # persist the model; confirm n_docs and n_classes in the log
 ```
 
 This is a manual, judgment-driven process, not something in CI -- it needs
