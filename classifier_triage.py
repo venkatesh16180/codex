@@ -16,7 +16,7 @@ def _load_model():
 logger = get_logger(__name__)
 MODEL_PATH = 'data/triage_classifier.joblib'
 CONFIDENCE_THRESHOLD = 0.14  # Recalibrated on 27 docs: ranges overlap (correct 0.13-0.20, wrong 0.12-0.14).
-                              # At 0.14: 13/14 accepted correct, 8/9 errors abstained, 5/18 correct abstained.
+                              # At 0.14: 13/13 accepted correct, 9/9 errors abstained, 5/18 correct abstained (doc 17 = 0.13993, margin 0.00007).
                               # Kept deliberately, see BUILD-JOURNAL. Source: dev_checks/calibrate_confidence_threshold.py.
                               # Recalibrate as the corpus grows.
 
