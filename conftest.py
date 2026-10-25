@@ -9,6 +9,7 @@
 #
 # pytest is a new dependency as of Phase 15 -- add it to requirements.in
 # and reinstall/recompile before running this.
+import sqlite3
 import pytest
 from db import get_connection
 
@@ -16,5 +17,20 @@ from db import get_connection
 @pytest.fixture(scope='session')
 def conn():
     c = get_connection()
+    yield c
+    c.close()
+
+
+@pytest.fixture
+def fresh_db():
+    """An isolated in-memory database built from the real schema.sql, one per test.
+    Added in Phase 20 alongside (not instead of) the live-database `conn` fixture above:
+    tests that insert into pending_actions, or that must prove schema.sql itself
+    builds, must not touch the real library."""
+    c = sqlite3.connect(':memory:')
+    c.row_factory = sqlite3.Row
+    c.execute('PRAGMA foreign_keys = ON')
+    with open('schema.sql', encoding='utf-8') as f:
+        c.executescript(f.read())
     yield c
     c.close()

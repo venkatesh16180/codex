@@ -203,7 +203,19 @@ def triage_document(conn, embed_model, document_id: int, max_iterations: int = 6
         for call in response.message.tool_calls:
             logger.info('tool_call name=%s args=%s', call.function.name, call.function.arguments)
             fn = tools_by_name.get(call.function.name)
-            result = fn(**call.function.arguments) if fn else f'Unknown tool: {call.function.name}'
+            if fn is None:
+                result = f'Unknown tool: {call.function.name}'
+            else:
+                try:
+                    result = fn(**call.function.arguments)
+                except TypeError as e:
+                    # A small model can emit wrong or missing argument names. Hand the error
+                    # back as an ERROR: result (the terminal-tool check below already treats
+                    # that prefix as "not a decision") so it can retry, instead of crashing
+                    # the triage and leaving the document ingested but never triaged.
+                    logger.warning('tool_call_bad_arguments name=%s error=%s', call.function.name, e)
+                    result = (f'ERROR: bad arguments for {call.function.name}: {e}. '
+                              f'Check the function signature and call it again.')
             messages.append({'role': 'tool', 'tool_name': call.function.name, 'content': str(result)})
             # Only treat a terminal-tool call as actually terminal if it succeeded --
             # propose_categorization can fail validation (bad slug) and return an
