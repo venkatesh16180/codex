@@ -3,21 +3,16 @@ import httpx
 import ollama
 from search import search_specialist  # reuses Phase 3's function as-is
 from web_search import fetch_web_context
-# chat.py -- was: CHAT_MODEL / HISTORY_TURNS / RELEVANCE_THRESHOLD as module constants
 from config import CHAT_MODEL, HISTORY_TURNS, RELEVANCE_THRESHOLD, NUM_CTX, LLM_CHAT_TIMEOUT_SEC, LLM_CONNECT_TIMEOUT_SEC
 from ollama_retry import chat_with_retry  # Phase 14
+from logging_setup import get_logger
 
-
-# CHAT_MODEL = 'llama3.2'  # deliberately NOT the tool-calling model -- see note below
-# HISTORY_TURNS = 3  # how many prior question/answer pairs to feed back in -- tune here
-# RELEVANCE_THRESHOLD = 0.3  # same noise floor Phase 3's isolation test used to
-                            # distinguish real matches from cross-topic scores
-# was silently defaulting to 2048 -- see BUILD-JOURNAL.md
+logger = get_logger(__name__)
 
 # Phase 14: a single client, built once at import time, used for every chat call.
-# LLM_CHAT_TIMEOUT_SEC (90s) is the READ timeout only -- this is the user-facing
-# path, so it must fail fast rather than hang a live conversation. Same
-# connect/read split rationale as agent.py's _triage_client.
+# LLM_CHAT_TIMEOUT_SEC is the READ timeout only (set in config.py / .env), and the
+# user is waiting on this path, so it is kept far shorter than the triage timeout.
+# Same connect/read split rationale as agent.py's _triage_client.
 _chat_client = ollama.Client(timeout=httpx.Timeout(
     connect=LLM_CONNECT_TIMEOUT_SEC,
     read=LLM_CHAT_TIMEOUT_SEC,
@@ -65,20 +60,58 @@ def build_persona_prompt(specialist: dict, web_enabled: bool = False) -> str:
 
 # chat.py (continued)
 
+def _fmt_score(score) -> str:
+    return 'n/a' if score is None else f'{score:.4f}'
+
+
+def _retrieve_local(conn, embed_model, specialist_id: int, query: str, top_k: int) -> tuple:
+    """Scoped search plus the relevance floor.
+
+    A query with no real informational content (e.g. "remember this number: 12")
+    can still return the top_k nearest chunks by cosine distance -- nearest isn't the
+    same as relevant. If even the best match falls below the noise floor, treat it as
+    no local context at all, rather than handing the model irrelevant chunks it's
+    instructed to answer strictly from.
+
+    Returns (chunks, best_score). chunks is [] when the best match is below the floor;
+    best_score is the raw top similarity (None if nothing is indexed), returned so the
+    caller can log it -- the floor is a borrowed heuristic, and these logs are the data
+    for tuning it."""
+    local = search_specialist(conn, embed_model, specialist_id, query, top_k)
+    best = local[0]['score'] if local else None
+    if local and best < RELEVANCE_THRESHOLD:
+        return [], best
+    return local, best
+
+
+def _last_user_question(history: list | None) -> str | None:
+    for message in reversed(history or []):
+        if message.get('role') == 'user':
+            return message['content']
+    return None
+
+
 def chat_with_specialist(conn, embed_model, specialist_slug: str, user_query: str,
                           top_k: int = 5, use_web: bool = False, history: list | None = None) -> str:
     specialist = conn.execute(
         'SELECT * FROM specialists WHERE slug=?', (specialist_slug,)
     ).fetchone()
 
-    local = search_specialist(conn, embed_model, specialist['specialist_id'], user_query, top_k)
-    # A query with no real informational content (e.g. "remember this number: 12")
-    # can still return the top_k nearest chunks by cosine distance -- nearest
-    # isn't the same as relevant. If even the best match falls below the noise
-    # floor, treat this turn as having no local context at all, rather than
-    # handing the model irrelevant chunks it's instructed to answer strictly from.
-    if local and local[0]['score'] < RELEVANCE_THRESHOLD:
-        local = []
+    local, top_score = _retrieve_local(conn, embed_model, specialist['specialist_id'], user_query, top_k)
+    fallback_score = None
+    if not local:
+        # A follow-up ("what did you just say?", "where was that from?") has almost no
+        # content of its own, so it falls below the relevance floor even though the
+        # conversation is squarely about this specialist's material. Before Phase 20 that
+        # returned a canned message without ever calling the model, so the history
+        # was never used. Retrieve with the previous question instead; the model still
+        # decides whether that context answers the follow-up.
+        previous = _last_user_question(history)
+        if previous:
+            local, fallback_score = _retrieve_local(conn, embed_model, specialist['specialist_id'], previous, top_k)
+    logger.info('chat_retrieval specialist=%s top_score=%s floor=%.2f followup_fallback=%s fallback_score=%s',
+                specialist_slug, _fmt_score(top_score), RELEVANCE_THRESHOLD,
+                fallback_score is not None and bool(local), _fmt_score(fallback_score))
     local_context = '\n\n---\n\n'.join(
         f"[Source: {r['source_title']}]\n{r['text']}" for r in local
     )
@@ -86,7 +119,16 @@ def chat_with_specialist(conn, embed_model, specialist_slug: str, user_query: st
     web_context = fetch_web_context(user_query) if use_web else ''
 
     if not local_context and not web_context:
-        return "This specialist doesn't have any approved material yet, and web search is off."
+        tail = ' Web search is off.' if not use_web else ' Web search returned nothing either.'
+        has_material = conn.execute(
+            'SELECT 1 FROM specialist_chunks WHERE specialist_id=? LIMIT 1',
+            (specialist['specialist_id'],)
+        ).fetchone()
+        if has_material is None:
+            return f"This specialist doesn't have any approved material yet.{tail}"
+        # The specialist has material; nothing in it is close enough to this question.
+        return ("Nothing in this specialist's approved material matches that question "
+                f"closely enough to answer from it.{tail} Try rephrasing it.")
 
     parts = []
     if local_context:
@@ -108,6 +150,6 @@ def chat_with_specialist(conn, embed_model, specialist_slug: str, user_query: st
         _chat_client,
         model=CHAT_MODEL,
         messages=messages,
-        options={'num_ctx': NUM_CTX}
+        options={'num_ctx': NUM_CTX}  # Ollama's default of 2048 silently truncated context -- see BUILD-JOURNAL.md
     )
     return response.message.content
