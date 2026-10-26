@@ -7,11 +7,10 @@ from embeddings import deserialize_embedding, cosine_similarity
 from config import LIBRARIAN_MODEL, LLM_TRIAGE_TIMEOUT_SEC, LLM_CONNECT_TIMEOUT_SEC
 # agent.py -- was: print(f'  -> called {call.function.name}({call.function.arguments})')
 from logging_setup import get_logger
-from content_preview import find_real_content_start
+from content_preview import find_real_content_start, FRONT_MATTER_SCAN_LIMIT
 from ollama_retry import chat_with_retry  # Phase 14
 
-FRONT_MATTER_SCAN_LIMIT = 30  # generous headroom past Rich Dad Poor Dad's real
-                              # example (front matter ended at chunk 7)
+# FRONT_MATTER_SCAN_LIMIT now lives in content_preview.py (shared with the classifier path).
 
 PREVIEW_CHUNK_COUNT = 8  # widened from 3 -- a heuristic can find where front matter
                          # *starts* ending reasonably well (keyword/numeric-ratio

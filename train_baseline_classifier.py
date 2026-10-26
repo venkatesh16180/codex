@@ -9,7 +9,7 @@ from logging_setup import get_logger
 logger = get_logger(__name__)
  
 # Excluded: cannot evaluate a class with only 1 example under LOOCV.
-# See Phase 10 BUILD-JOURNAL for why these two are singletons by decision, not oversight.
+# See Phase 10 BUILD-JOURNAL for why singletons are excluded by decision, not oversight.
 EXCLUDED_SLUGS = {'banking_ml', 'cognitivepsychology', 'game_walkthroughs', 'leadership'}
  
 def load_dataset(path='data/triage_labels.jsonl'):
@@ -43,12 +43,14 @@ def run_loocv(texts, labels, doc_ids):
         clf.fit(X_train, train_labels)
  
         t0 = time.perf_counter()
-        pred = clf.predict(X_test)[0]
+        proba = clf.predict_proba(X_test)[0]
+        pred = clf.classes_[proba.argmax()]   # same argmax as clf.predict() for this model
         inference_times.append(time.perf_counter() - t0)
+        confidence = float(proba.max())
  
         y_true.append(test_label); y_pred.append(pred)
-        per_doc.append({'document_id': test_doc_id, 'true': test_label,
-                        'predicted': pred, 'correct': pred == test_label})
+        per_doc.append({'document_id': test_doc_id, 'true': test_label, 'predicted': pred,
+                        'correct': pred == test_label, 'confidence': confidence})
  
     return y_true, y_pred, per_doc, inference_times
  
@@ -64,4 +66,5 @@ if __name__ == '__main__':
     print(classification_report(y_true, y_pred, zero_division=0))
     for r in per_doc:
         mark = 'OK ' if r['correct'] else 'ERR'
-        print(f"{mark} doc={r['document_id']:>3} true={r['true']:<22} pred={r['predicted']}")
+        print(f"{mark} doc={r['document_id']:>3} true={r['true']:<22} pred={r['predicted']:<22} "
+              f"confidence={r['confidence']:.4f}")

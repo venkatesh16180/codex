@@ -2,11 +2,11 @@
 import json
 from db import get_connection
 from logging_setup import get_logger
+from content_preview import build_classifier_text, CLASSIFIER_MAX_CHARS
  
 logger = get_logger(__name__)
 
-MAX_CHARS = 16000  # enough for topic signal without dumping full-book text;
-                   # keeps forward-compat with a token-limited classifier later
+MAX_CHARS = CLASSIFIER_MAX_CHARS  # defined in content_preview.py -- training and serving must agree
  
 def export_labels(conn, out_path='data/triage_labels.jsonl', max_chars=MAX_CHARS):
     rows = conn.execute(
@@ -35,14 +35,9 @@ def export_labels(conn, out_path='data/triage_labels.jsonl', max_chars=MAX_CHARS
                 (row['document_id'],)
             ).fetchall()
             
-            text_parts, total_len, truncated = [], 0, False
-            for c in chunks:
-                if total_len >= max_chars:
-                    truncated = True
-                    break
-                text_parts.append(c['chunk_text'])
-                total_len += len(c['chunk_text'])
-            text = '\n\n'.join(text_parts)
+            # The same function the serving path uses (Phase 20) -- front matter skipped,
+            # chunks joined with spaces, capped at max_chars.
+            text, truncated = build_classifier_text(chunks, max_chars=max_chars)
 
             if truncated:
                 logger.warning('document_id=%s (%s) truncated at %d chars', row['document_id'], row['title'], max_chars)

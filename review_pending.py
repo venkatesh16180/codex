@@ -147,8 +147,10 @@ def print_summary(action, conn):
     if not already_classifier_sourced:
         try:
             opinion = classifier_triage(conn, action['document_id'])
-            slug = opinion.get('specialist_slug', 'below confidence threshold')
-            print(f"[classifier cross-check: {slug} -- informational only, not authoritative]")
+            verdict = ('above threshold' if opinion['action_type'] == 'categorize_document'
+                       else 'below threshold, would abstain')
+            print(f"[classifier cross-check: best guess {opinion['predicted_slug']} "
+                  f"({opinion['confidence']:.4f}), {verdict} -- informational only, not authoritative]")
         except FileNotFoundError:
             pass  # no persisted classifier yet (Phase 13.1 not run) -- skip silently
 
