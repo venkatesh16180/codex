@@ -1,6 +1,8 @@
 # streamlit_app.py
 import os
 os.environ['HF_HUB_OFFLINE'] = '1'
+import httpx
+import ollama
 import streamlit as st
 from sentence_transformers import SentenceTransformer
 from db import get_connection
@@ -89,16 +91,25 @@ query = st.chat_input('Ask a question')
 
 if query:
     recent_history = get_recent_history(conn, st.session_state.session_id, turns=HISTORY_TURNS)
-    answer = chat_with_specialist(conn, embed_model, specialist['slug'], query,
-                                   use_web=use_web, history=recent_history)
+    answer = None
+    try:
+        answer = chat_with_specialist(conn, embed_model, specialist['slug'], query,
+                                       use_web=use_web, history=recent_history)
+    except (httpx.TimeoutException, ConnectionError, ollama.ResponseError) as e:
+        # The model call timed out, Ollama is unreachable (retries exhausted), or the model is
+        # missing. Show that instead of a traceback; nothing is saved for this turn, so a
+        # failed question never appears as an answered one in the sidebar history.
+        st.error(f"Couldn't get an answer ({type(e).__name__}: {e}). Check that Ollama is "
+                 "running and the model is installed, then ask again. This question was not saved.")
 
-    if st.session_state.session_id is None:
-        st.session_state.session_id = create_session(conn, specialist['specialist_id'], query)
+    if answer is not None:
+        if st.session_state.session_id is None:
+            st.session_state.session_id = create_session(conn, specialist['specialist_id'], query)
 
-    save_message(conn, st.session_state.session_id, 'user', query)  # used_web defaults to 0 -- a question doesn't "use the web"
-    save_message(conn, st.session_state.session_id, 'assistant', answer, used_web=use_web)
+        save_message(conn, st.session_state.session_id, 'user', query)  # used_web defaults to 0 -- a question doesn't "use the web"
+        save_message(conn, st.session_state.session_id, 'assistant', answer, used_web=use_web)
 
-    st.session_state.history.append((query, answer))
+        st.session_state.history.append((query, answer))
 
 for q, a in st.session_state.history:
     if q:
