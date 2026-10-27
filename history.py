@@ -31,7 +31,7 @@ def load_session_messages(conn, session_id: int):
     return conn.execute(
         '''SELECT role, content, used_web, created_at
            FROM chat_messages WHERE session_id=?
-           ORDER BY created_at ASC''',
+           ORDER BY created_at ASC, message_id ASC''',
         (session_id,)
     ).fetchall()
     
@@ -67,7 +67,7 @@ def get_recent_history(conn, session_id: int, turns: int = 3):
         return []
     rows = conn.execute(
         '''SELECT role, content FROM chat_messages
-           WHERE session_id=? ORDER BY created_at DESC LIMIT ?''',
+           WHERE session_id=? ORDER BY created_at DESC, message_id DESC LIMIT ?''',
         (session_id, turns * 2)
     ).fetchall()
     return [{'role': r['role'], 'content': r['content']} for r in reversed(rows)]
