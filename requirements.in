@@ -1,4 +1,5 @@
 ollama
+httpx
 sentence-transformers
 numpy
 streamlit
@@ -11,5 +12,6 @@ python-dotenv
 scikit-learn
 joblib
 fastapi
+pydantic
 uvicorn
 pytest

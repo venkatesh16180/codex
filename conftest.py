@@ -9,7 +9,15 @@
 #
 # pytest is a new dependency as of Phase 15 -- add it to requirements.in
 # and reinstall/recompile before running this.
+import os
 import sqlite3
+import tempfile
+
+# Phase 20: keep test runs out of the real data/codex.log. Before this, tests wrote lines
+# (e.g. an export count for a temp path) into the production log, where they had to be told
+# apart from real runs. This must run before anything imports config.py / logging_setup.py.
+os.environ.setdefault('CODEX_LOG_PATH', os.path.join(tempfile.gettempdir(), 'codex-tests.log'))
+
 import pytest
 from db import get_connection
 
