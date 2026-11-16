@@ -45,7 +45,7 @@ def main(path_or_glob: str, backend: str = 'llm'):
         print(f'{len(failed)} document(s) ingested but NOT triaged (rerunning this command will skip them):')
         for document_id, path, e in failed:
             print(f'  document_id={document_id}  {path}  -- {type(e).__name__}: {e}')
-        print('Re-triage them with dev_checks/retriage_orphaned.py.')
+        print('Re-triage them with: python retriage_orphaned.py')
     print('Run `python review_pending.py` to approve or reject before anything goes live.')
     if failed:
         sys.exit(1)
