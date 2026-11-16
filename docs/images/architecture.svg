@@ -1,38 +1,73 @@
-<svg width="680" height="610" viewBox="0 0 680 610" xmlns="http://www.w3.org/2000/svg" role="img">
-<title>Codex architecture</title>
-<desc>A new document flows through the Librarian agent, is staged in pending_actions, passes a human review gate, is committed to a specialist knowledge base, and becomes retrievable by that specialist's grounded chat.</desc>
-<defs>
-  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </marker>
-</defs>
-<rect width="680" height="610" fill="#FFFFFF"/>
-
-<rect x="180" y="40" width="320" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
-<text x="340" y="62" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">New document</text>
-<line x1="340" y1="84" x2="340" y2="124" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-<rect x="180" y="124" width="320" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
-<text x="340" y="146" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">Librarian (agent)</text>
-<text x="340" y="164" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">Reasons, calls tools, proposes</text>
-<line x1="340" y1="180" x2="340" y2="220" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-<rect x="180" y="220" width="320" height="56" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
-<text x="340" y="242" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#412402">pending_actions</text>
-<text x="340" y="260" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#633806">Staged, nothing live yet</text>
-<line x1="340" y1="276" x2="340" y2="316" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-<rect x="180" y="316" width="320" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
-<text x="340" y="338" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">Human review gate</text>
-<text x="340" y="356" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#712B13">review_pending.py: approve or reject</text>
-<line x1="340" y1="372" x2="340" y2="412" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-<rect x="180" y="412" width="320" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
-<text x="340" y="434" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">Specialist knowledge base</text>
-<text x="340" y="452" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">Committed, scoped by specialist_id</text>
-<line x1="340" y1="468" x2="340" y2="508" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-<rect x="180" y="508" width="320" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
-<text x="340" y="530" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#042C53">9 specialist chatbots</text>
-<text x="340" y="548" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#0C447C">Retrieves only from its own material</text>
+<svg width="860" height="784" viewBox="0 0 860 784" xmlns="http://www.w3.org/2000/svg" role="img" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToxMjBkMTUyNC01ZjVlLTQyNjMtODgxYS1lYzdlNWJjYjcyNTcAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaLmigB/3lljJb4L1Tsx0rDQAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDphMzI0ODBmNC1iNWQwLTQ5YjUtOWFhOS1jZjI4N2UzN2NjOTZscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoH7F2NFBW4vK35WSVWJnEIwAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgglg5Drlp04OXpKDqSpvgmvb6J0LPDUEYBaup/nbHRRoukZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaHTyPPc3RrJRCqR8OmL2rxoAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCD5jWDhZMv+M7uOgXlzOyOkEugmdIx5sKbZRGKwoIAY3mRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBihZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjEyMGQxNTI0LTVmNWUtNDI2My04ODFhLWVjN2U1YmNiNzI1Ny9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmFhNTczYjU5LTZjMDgtNGI0MC05YmVkLWNlNmU2YTU1YmI3MnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCWDkOuWnTg5ekoOpKm+Ca9vonQs8NQRgFq6n+dsdFGi6JjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggnZFvec1kYiKVqyKn9ma833YYLny+6atLuTUkoxXykCuiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg4Nkp2EIixiOo1a+wH8A8uKYoBg3xC+gc3ieRgF3+kad0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQFVPxHTzZSgP1u79erwir6N9+YOTb5FQhz0p699Eu9oWtQBp9zAJkH0ZmVLZAbVsdefiB24yobIemzUkqBMLdPQ=</c2pa:manifest></metadata>
+  <title>Codex architecture</title>
+  <desc>A new document is ingested (extract, dedup, chunk, embed) and triaged by one of two backends: the Librarian agent or a deterministic classifier. Both only stage proposals in pending_actions. A human review gate approves or rejects each one; approved decisions are committed to specialist knowledge bases, which feed one grounded RAG chatbot per specialist. Approved decisions also train the classifier periodically. Web search is an opt-in chat feature and the only network call at runtime.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+  </defs>
+  <rect width="860" height="784" fill="#FFFFFF" />
+  <path d="M330.0 82 V118" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M330.0 174 V200 H185.0 V226" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M330.0 200 H475.0 V226" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M185.0 298 V334" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M475.0 298 V334" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M330.0 386 V422" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M330.0 478 V514" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M330.0 566 V602" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" />
+  <path d="M640 262.0 H600" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4" />
+  <path d="M560 540.0 H730 V298" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4" />
+  <path d="M600 638.0 H640" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5 4" />
+  <rect x="150" y="30" width="360" height="52" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5" />
+  <text x="330.0" y="46" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">New document</text>
+  <text x="330.0" y="64" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">pdf, epub, docx, txt, md</text>
+  <rect x="150" y="118" width="360" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5" />
+  <text x="330.0" y="136" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Ingestion (no LLM)</text>
+  <text x="330.0" y="154" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">extract, hash-dedup, chunk, embed, store in SQLite</text>
+  <rect x="60" y="226" width="250" height="72" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5" />
+  <text x="185.0" y="245" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">Librarian (agent)</text>
+  <text x="185.0" y="262" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">Tool-calling loop; can propose</text>
+  <text x="185.0" y="279" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">a new specialist</text>
+  <rect x="350" y="226" width="250" height="72" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5" />
+  <text x="475.0" y="245" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Classifier (no LLM)</text>
+  <text x="475.0" y="262" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">TF-IDF + logistic regression;</text>
+  <text x="475.0" y="279" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">abstains below a confidence of 0.14</text>
+  <rect x="100" y="334" width="460" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5" />
+  <text x="330.0" y="350" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#412402">pending_actions</text>
+  <text x="330.0" y="368" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#633806">Staged, nothing live yet; each row records which backend proposed it</text>
+  <rect x="100" y="422" width="460" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5" />
+  <text x="330.0" y="433" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">Human review gate</text>
+  <text x="330.0" y="450" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#712B13">review_pending.py: approve or reject</text>
+  <text x="330.0" y="467" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#712B13">shows the classifier's best guess as a cross-check</text>
+  <rect x="100" y="514" width="460" height="52" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5" />
+  <text x="330.0" y="530" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">Specialist knowledge bases</text>
+  <text x="330.0" y="548" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">Committed, scoped by specialist_id</text>
+  <rect x="60" y="602" width="540" height="72" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5" />
+  <text x="330.0" y="621" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#042C53">Specialist chatbots (RAG, no tools)</text>
+  <text x="330.0" y="638" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#0C447C">One per specialist; answers only from its own material,</text>
+  <text x="330.0" y="655" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#0C447C">with the last few turns of conversation history</text>
+  <rect x="640" y="226" width="180" height="72" rx="8" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="5 4" />
+  <text x="730.0" y="236.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Classifier training</text>
+  <text x="730.0" y="253.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">manual, periodic:</text>
+  <text x="730.0" y="270.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">export_triage_labels.py,</text>
+  <text x="730.0" y="287.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">train_final_classifier.py</text>
+  <rect x="640" y="602" width="180" height="72" rx="8" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="5 4" />
+  <text x="730.0" y="612.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Web search (opt-in)</text>
+  <text x="730.0" y="629.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">off by default;</text>
+  <text x="730.0" y="646.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">the only network call</text>
+  <text x="730.0" y="663.5" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">at runtime</text>
+  <text x="340.0" y="193" text-anchor="start" font-family="sans-serif" font-size="11" fill="#5F5E5A">per run: --backend llm (default) or classifier</text>
+  <text x="340.0" y="104" text-anchor="start" font-family="sans-serif" font-size="11" fill="#5F5E5A">add_source.py, or api.py as an async job</text>
+  <text x="742" y="420" text-anchor="start" font-family="sans-serif" font-size="11" fill="#5F5E5A">approved</text>
+  <text x="742" y="434" text-anchor="start" font-family="sans-serif" font-size="11" fill="#5F5E5A">decisions are</text>
+  <text x="742" y="448" text-anchor="start" font-family="sans-serif" font-size="11" fill="#5F5E5A">the labels</text>
+  <rect x="60" y="708" width="14" height="14" rx="3" fill="#EEEDFE" stroke="#534AB7" stroke-width="1" />
+  <text x="80" y="716" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#2C2C2A">agent: the model decides the next step</text>
+  <rect x="390" y="708" width="14" height="14" rx="3" fill="#E6F1FB" stroke="#185FA5" stroke-width="1" />
+  <text x="410" y="716" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#2C2C2A">RAG: one retrieve-then-generate pass</text>
+  <rect x="60" y="730" width="14" height="14" rx="3" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1" />
+  <text x="80" y="738" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#2C2C2A">deterministic code</text>
+  <rect x="390" y="730" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="3 2" />
+  <text x="410" y="738" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#2C2C2A">optional or periodic</text>
+  <text x="60" y="762" font-family="sans-serif" font-size="11" fill="#5F5E5A">Shared by everything: one SQLite database (WAL), config.py / .env, a rotating log.</text>
 </svg>
