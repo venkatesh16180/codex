@@ -78,6 +78,7 @@ httptools==0.8.0
     # via streamlit
 httpx[brotli,http2,socks]==0.28.1
     # via
+    #   -r requirements.in
     #   ddgs
     #   huggingface-hub
     #   ollama
@@ -162,6 +163,7 @@ pyarrow==25.0.1
     # via streamlit
 pydantic==2.13.4
     # via
+    #   -r requirements.in
     #   fastapi
     #   ollama
 pydantic-core==2.46.4
