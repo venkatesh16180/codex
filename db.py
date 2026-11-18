@@ -1,4 +1,6 @@
+import os
 import sqlite3
+
 # db.py -- was: DB_PATH = "data/librarian.db"
 from config import DB_PATH
 
@@ -10,6 +12,12 @@ from config import DB_PATH
 # via @st.cache_resource, which can hand that object back on a different
 # internal thread than the one that created it.
 def get_connection(check_same_thread: bool = True):
+    # A fresh clone has no data/ directory; without this, sqlite3 fails with
+    # 'unable to open database file', which does not say why. The guard matters:
+    # os.path.dirname('librarian.db') is '' and os.makedirs('') raises.
+    parent = os.path.dirname(DB_PATH)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     conn = sqlite3.connect(DB_PATH, check_same_thread=check_same_thread)
     conn.row_factory = sqlite3.Row   # lets later code do row['column_name'] instead of row[0]
     conn.execute("PRAGMA foreign_keys = ON;")
